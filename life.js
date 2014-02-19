@@ -25,7 +25,6 @@ World.prototype.toString = function() {
 }
 
 World.prototype.update = function () {
-	console.log("idk");
 	var newLiving = Array();
 	var newDead = Array();
 	for(var i =0; i<this.HEIGHT; i++){
@@ -37,38 +36,42 @@ World.prototype.update = function () {
 			for(var k = i-1; k<=i+1; k++){
 				for(var m = j-1; m<=j+1;m++){
 					//this looks for adj node
-					if((k <0) || (m<0) || (k>=this.HEIGHT) || (m>=this.WIDTH) ){
+					if((k <0) || (m<0) || (k>=this.HEIGHT) || (m>=this.WIDTH)){
 						continue;
 					}
 					livingNeighbors += this.grid[k][m];
-					if(currNode){
-						livingNeighbors--;
-					}
 				}
+			}
+			if(currNode){
+				livingNeighbors--;
 			}
 			//update life of cell
 			if(currNode){
 				if((livingNeighbors ==1) || (livingNeighbors>3)){
-					newDead.push([i, j]);
+					pusher =function (){
+						var deadCords = {yCord: i, xCord: j};
+						newDead.push(deadCords);
+					};
+					pusher();
 				}
 			}else{
 				if(livingNeighbors ==3) {
-					newLiving.push([i, j]);
+					pusher = function(){
+						var lifeCords = {yCord: i, xCord: j}
+						newLiving.push(lifeCords);
+					}
+				pusher();
 				}
 			}
 		}
-	}	
-	console.log("newDead.length = " + newDead.length)
-	console.log("newDead.length = " + newLiving.length)
-	for (var i = 0; i < newDead.length; i++) {
-		var ij = newDead[i];
-		console.log("i, j = " + ij[0] + ", " + ij[1]);
-		this.grid[ij[0]][ij[1]] = 0;
+	}
+	for(var i = 0; i< newDead.length; i++) {
+		var killMe= newDead[i];
+		this.grid[killMe.yCord][killMe.xCord] = 0;
 	}
 	for (var i = 0; i < newLiving.length; i++) {
-		console.log(ij);
-		var ij = newLiving[i];
-		this.grid[ij[0]][ij[1]] = 0;
+		var giveLife = newLiving[i];
+		this.grid[giveLife.yCord][giveLife.xCord] = 1;
 	}
 }
 
@@ -77,7 +80,6 @@ var game = new World();
 game.grid[4][4] = 1;
 game.grid[4][5] = 1;
 game.grid[4][6] = 1;
-
 	
 console.log(game.toString());
 game.update();
