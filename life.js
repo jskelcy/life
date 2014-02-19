@@ -48,19 +48,13 @@ World.prototype.update = function () {
 			//update life of cell
 			if(currNode){
 				if((livingNeighbors ==1) || (livingNeighbors>3)){
-					pusher =function (){
-						var deadCords = {yCord: i, xCord: j};
-						newDead.push(deadCords);
-					};
-					pusher();
+					var deadCords = {yCord: i, xCord: j};
+					newDead.push(deadCords);
 				}
 			}else{
 				if(livingNeighbors ==3) {
-					pusher = function(){
-						var lifeCords = {yCord: i, xCord: j}
-						newLiving.push(lifeCords);
-					}
-				pusher();
+					var lifeCords = {yCord: i, xCord: j}
+					newLiving.push(lifeCords);
 				}
 			}
 		}
@@ -74,7 +68,6 @@ World.prototype.update = function () {
 		this.grid[giveLife.yCord][giveLife.xCord] = 1;
 	}
 }
-
 
 var game = new World();
 game.grid[4][4] = 1;
