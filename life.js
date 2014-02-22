@@ -2,9 +2,7 @@
 
     var renderGrid = function(context, grid, height, width) {
         var numRows = grid.length;
-        console.log("numRows = " + numRows);
         var numCols = grid[0].length;
-        console.log("numCols = " + numCols);
         var x, y;
         var cellWidth = this.WIDTH/numCols;
         var cellHeight = this.HEIGHT/numRows;
@@ -41,29 +39,58 @@
         context.strokeStyle = "black";
     }
 
-    var draw = function() {
+    var init = function() {
         this.WIDTH = 500;
         this.HEIGHT = 500;
 
         var canvas = document.getElementById("canvas");
         canvas.width = this.WIDTH;
         canvas.height = this.HEIGHT;
+        exports.canvas = canvas;
+        exports.WIDTH = this.WIDTH;
+        exports.HEIGHT = this.HEIGHT;
         var context = canvas.getContext("2d");
+        exports.context = context;
 
         var game = new World();
+        exports.game = game;
+        canvas.addEventListener("click", toggleCell, false);
         game.grid[4][4] = 1;
         game.grid[4][5] = 1;
         game.grid[4][6] = 1;
-        
         renderGrid(context, game.grid, this.WIDTH, this.HEIGHT);
-        setInterval(function(){
-            console.log("Update");
-            game.update();
-            renderGrid(context, game.grid, this.WIDTH, this.HEIGHT);
-        }, 1000);
+    };
+
+    var draw = function() {
+        var update = function(){
+            exports.game.update();
+            renderGrid(exports.context, exports.game.grid, exports.WIDTH, exports.HEIGHT);
+        };
+        exports.intervalId = setInterval(update, 100);
+    };
+
+    toggleCell = function(e) {
+        var offsetLeft = canvas.offsetLeft;
+        var offsetTop = canvas.offsetTop;
+        var x = e.pageX - offsetLeft;
+        var y = e.pageY - offsetTop;
+        var numRows = exports.game.grid.length;
+        var numCols = exports.game.grid[0].length;
+        var cellWidth = exports.WIDTH/numCols;
+        var cellHeight = exports.HEIGHT/numRows;
+        var i = Math.floor(y / cellHeight);
+        var j = Math.floor(x / cellWidth);
+        game.grid[i][j] = !game.grid[i][j];
+        renderGrid(exports.context, exports.game.grid, exports.WIDTH, exports.HEIGHT);
+    }
+
+    stopDraw = function() {
+        clearInterval(exports.intervalId);
     };
 
     exports.draw = draw;
+    exports.stopDraw = stopDraw;
+    exports.init = init;
 
 })(this);
 

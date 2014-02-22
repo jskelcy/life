@@ -1,12 +1,14 @@
 <html>
-  <head>
-    <title>Game of Life</title>
-    <script type="text/javascript" src="life.js"></script>
-    <style type="text/css">
-      canvas { border: 1px solid black; }
-    </style>
-  </head>
-  <body onload="draw();">
-    <canvas id="canvas" width=500 height=500></canvas>
-  </body>
+    <head>
+        <title>Game of Life</title>
+        <script type="text/javascript" src="life.js"></script>
+        <style type="text/css">
+            canvas { border: 1px solid black; }
+        </style>
+    </head>
+    <body onload="init();">
+        <input id="startButton" type="button" value="start" onclick="draw();" />
+        <input id="startButton" type="button" value="stop" onclick="stopDraw();" />
+        <canvas id="canvas" width=500 height=500></canvas>
+    </body>
 </html>
