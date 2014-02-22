@@ -1,22 +1,9 @@
 ;(function (exports) {
 
-    var draw = function() {
-        this.WIDTH = 500;
-        this.HEIGHT = 500;
-
-        var canvas = document.getElementById("canvas");
-        canvas.width = this.WIDTH;
-        canvas.height = this.HEIGHT;
-        var context = canvas.getContext("2d");
-
-        var game = new World();
-        game.grid[4][4] = 1;
-        game.grid[4][5] = 1;
-        game.grid[4][6] = 1;
-        
-        var numRows = game.grid.length;
+    var renderGrid = function(context, grid, height, width) {
+        var numRows = grid.length;
         console.log("numRows = " + numRows);
-        var numCols = game.grid[0].length;
+        var numCols = grid[0].length;
         console.log("numCols = " + numCols);
         var x, y;
         var cellWidth = this.WIDTH/numCols;
@@ -26,7 +13,7 @@
             for (var j = 0; j < numCols; j++) {
                 y = i*cellWidth;
                 x = j*cellHeight;
-                if (game.grid[i][j] == 1) {
+                if (grid[i][j] == 1) {
                     context.fillStyle = "rgb(0, 0, 0)";
                 } else {
                     context.fillStyle = "rgb(255, 255, 255)";
@@ -52,7 +39,28 @@
             context.stroke();
         }
         context.strokeStyle = "black";
+    }
 
+    var draw = function() {
+        this.WIDTH = 500;
+        this.HEIGHT = 500;
+
+        var canvas = document.getElementById("canvas");
+        canvas.width = this.WIDTH;
+        canvas.height = this.HEIGHT;
+        var context = canvas.getContext("2d");
+
+        var game = new World();
+        game.grid[4][4] = 1;
+        game.grid[4][5] = 1;
+        game.grid[4][6] = 1;
+        
+        renderGrid(context, game.grid, this.WIDTH, this.HEIGHT);
+        setInterval(function(){
+            console.log("Update");
+            game.update();
+            renderGrid(context, game.grid, this.WIDTH, this.HEIGHT);
+        }, 1000);
     };
 
     exports.draw = draw;
