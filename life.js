@@ -166,3 +166,4 @@ World.prototype.update = function () {
         this.grid[giveLife.yCord][giveLife.xCord] = 1;
     }
 }
+
