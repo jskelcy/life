@@ -1,143 +1,111 @@
-;(function (exports) {
+;(function(exports) {
 
-    var renderGrid = function(context, grid, height, width) {
-        var numRows = grid.length;
-        var numCols = grid[0].length;
-        var x, y;
-        var cellWidth = this.WIDTH/numCols;
-        var cellHeight = this.HEIGHT/numRows;
+  var gameState;
+  var ctx;
+  var canvas;
+  var intervalId;
 
-        for (var i = 0; i < numRows; i++) {
-            for (var j = 0; j < numCols; j++) {
-                y = i*cellWidth;
-                x = j*cellHeight;
-                if (grid[i][j] == 1) {
-                    context.fillStyle = "rgb(0, 0, 0)";
-                } else {
-                    context.fillStyle = "rgb(255, 255, 255)";
-                }
-                context.fillRect(x, y, cellWidth, cellHeight);
-            }
-        }
-
-        context.strokeStyle = "gray";
-        // render the horizontal grid lines
-        for (var i = 0; i <= numRows; i++) {
-            context.beginPath();
-            context.moveTo(0, i*cellHeight);
-            context.lineTo(this.WIDTH, i*cellHeight); 
-            context.stroke();
-        }
-
-        // render the vertical grid lines
-        for (var j = 0; j <= numCols; j++) {
-            context.beginPath();
-            context.moveTo(j*cellWidth, 0);
-            context.lineTo(j*cellWidth, this.HEIGHT); 
-            context.stroke();
-        }
-        context.strokeStyle = "black";
-    }
-
-    var init = function() {
-        this.WIDTH = 500;
-        this.HEIGHT = 500;
-
-        var canvas = document.getElementById("canvas");
-        canvas.width = this.WIDTH;
-        canvas.height = this.HEIGHT;
-        exports.canvas = canvas;
-        exports.WIDTH = this.WIDTH;
-        exports.HEIGHT = this.HEIGHT;
-        var context = canvas.getContext("2d");
-        exports.context = context;
-
-        var game = new World(100, 100);
-        exports.game = game;
-        canvas.addEventListener("click", toggleCell, false);
-        /*
-        game.grid[4][4] = 1;
-        game.grid[4][5] = 1;
-        game.grid[4][6] = 1;
-        */
-        renderGrid(context, game.grid, this.WIDTH, this.HEIGHT);
+  var startAnimate = function() {
+    var update = function(){
+      gameState = stepGame(gameState);
+      renderGrid(ctx, gameState, canvas.width, canvas.height);
     };
+    intervalId = setInterval(update, 100);
+  };
 
-    var draw = function() {
-        var update = function(){
-            exports.game.update();
-            renderGrid(exports.context, exports.game.grid, exports.WIDTH, exports.HEIGHT);
-        };
-        exports.intervalId = setInterval(update, 100);
-    };
+  var stopAnimate = function() {
+    clearInterval(intervalId);
+  };
 
-    toggleCell = function(e) {
-        var offsetLeft = canvas.offsetLeft;
-        var offsetTop = canvas.offsetTop;
-        var x = e.pageX - offsetLeft;
-        var y = e.pageY - offsetTop;
-        var numRows = exports.game.grid.length;
-        var numCols = exports.game.grid[0].length;
-        var cellWidth = exports.WIDTH/numCols;
-        var cellHeight = exports.HEIGHT/numRows;
-        var i = Math.floor(y / cellHeight);
-        var j = Math.floor(x / cellWidth);
-        game.grid[i][j] = !game.grid[i][j];
-        renderGrid(exports.context, exports.game.grid, exports.WIDTH, exports.HEIGHT);
+  exports.onload = function() {
+    gameState = initGame();
+    canvas = document.getElementById("canvas");
+    canvas.addEventListener("click", toggleCell, false);
+    ctx = canvas.getContext("2d");
+    renderGrid(ctx, gameState, canvas.width, canvas.height);
+  };
+
+  var initGame = function() {
+    return(
+      {
+      dim: 50,
+      grid: RandomGameGrid(50)
     }
+    );
+  };
 
-    stopDraw = function() {
-        clearInterval(exports.intervalId);
-    };
 
-    exports.draw = draw;
-    exports.stopDraw = stopDraw;
-    exports.init = init;
+  toggleCell = function(e) {
+    var offsetLeft = canvas.offsetLeft;
+    var offsetTop = canvas.offsetTop;
+    var x = e.pageX - offsetLeft;
+    var y = e.pageY - offsetTop;
+    var cellWidth = canvas.width/gameState.dim;
+    var cellHeight = canvas.height/gameState.dim;
+    var i = Math.floor(y / cellHeight);
+    var j = Math.floor(x / cellWidth);
+    gameState.grid[i][j] = !(gameState.grid[i][j]);
+    renderGrid(ctx, gameState, canvas.width, canvas.height);
+  }
 
-})(this);
+  var renderGrid = function(context, gameState, height, width) {
+    var numRows = gameState.dim;
+    var numCols = gameState.dim;
+    var x, y;
+    var cellWidth = width/numCols;
+    var cellHeight = height/numRows;
 
-var World = function(xCells, yCells){
-    this.WIDTH = xCells;
-    this.HEIGHT = yCells;
-    this.grid = new Array(this.HEIGHT);
-    for (var i = 0; i < this.HEIGHT; i++){
-        this.grid[i] = new Array(this.WIDTH);
-    }
-
-    for (var i = 0; i < this.HEIGHT; i++){
-        for(var j = 0; j < this.WIDTH; j++){
-            this.grid[i][j] = 0;
+    for (var i = 0; i < numRows; i++) {
+      for (var j = 0; j < numCols; j++) {
+        y = i*cellWidth;
+        x = j*cellHeight;
+        if (gameState.grid[i][j] == 1) {
+          context.fillStyle = "rgb(0, 0, 0)";
+        } else {
+          context.fillStyle = "rgb(255, 255, 255)";
         }
+        context.fillRect(x, y, cellWidth, cellHeight);
+      }
     }
 
-} 
-
-World.prototype.toString = function() {
-    for(var i = 0; i < this.HEIGHT; i++){
-        var row = "";
-            for(var j = 0; j < this.WIDTH; j++){
-                row += this.grid[i][j] + " ";
-            }
-        console.log(row);
+    context.strokeStyle = "gray";
+    // render the horizontal grid lines
+    for (var i = 0; i <= numRows; i++) {
+      context.beginPath();
+      context.moveTo(0, i*cellHeight);
+      context.lineTo(width, i*cellHeight);
+      context.stroke();
     }
-}
 
-World.prototype.update = function () {
+    // render the vertical grid lines
+    for (var j = 0; j <= numCols; j++) {
+      context.beginPath();
+      context.moveTo(j*cellWidth, 0);
+      context.lineTo(j*cellWidth, height);
+      context.stroke();
+    }
+    context.strokeStyle = "black";
+  }
+
+
+  var stepGame = function(gameState) {
+    var newState = initGame();
+    newState.grid = gameState.grid;
     var newLiving = Array();
     var newDead = Array();
-    for(var i = 0; i < this.HEIGHT; i++){
-        for(var j = 0; j < this.WIDTH; j++){
+    for(var i = 0; i < gameState.dim; i++){
+        for(var j = 0; j < gameState.dim; j++){
             //this moves through the entire grid
-            var currNode = this.grid[i][j];
+            var currNode = gameState.grid[i][j];
             var livingNeighbors = 0;
             //this nested for loop with traverse the 8 nodes around the currNode
             for(var k = i - 1; k <= i + 1; k++){
                 for(var m = j - 1; m <= j + 1; m++){
                     //this looks for adj node
-                    if((k < 0) || (m < 0) || (k >= this.HEIGHT) || (m >= this.WIDTH)){
+                    if((k < 0) || (m < 0) || (k >= gameState.dim) || (m >= gameState.dim)){
                         continue;
                     }
-                    livingNeighbors += this.grid[k][m];
+                    livingNeighbors += gameState.grid[k][m];
                 }
             }
             if(currNode){
@@ -151,19 +119,41 @@ World.prototype.update = function () {
                 }
             } else{
                 if (livingNeighbors == 3) {
-                    var lifeCords = {yCord: i, xCord: j}
+                    var lifeCords = {yCord: i, xCord: j};
                     newLiving.push(lifeCords);
                 }
             }
         }
     }
-    for(var i = 0; i < newDead.length; i++) {
+    for (var i = 0; i < newDead.length; i++) {
         var killMe = newDead[i];
-        this.grid[killMe.yCord][killMe.xCord] = 0;
+        newState.grid[killMe.yCord][killMe.xCord] = 0;
     }
     for (var i = 0; i < newLiving.length; i++) {
         var giveLife = newLiving[i];
-        this.grid[giveLife.yCord][giveLife.xCord] = 1;
+        newState.grid[giveLife.yCord][giveLife.xCord] = 1;
     }
-}
+    return newState;
+  };
 
+  function RandomGameGrid(dim){
+    var grid = new Array(dim);
+    for (var i = 0; i < dim; i++){
+        grid[i] = new Array(dim);
+    }
+    for (var i = 0; i < dim; i++){
+        for(var j = 0; j < dim; j++){
+          if (Math.random() < 0.5) {
+            grid[i][j] = 1;
+          } else {
+            grid[i][j] = 0;
+          }
+        }
+    }
+    return grid;
+  }
+
+  exports.startAnimate = startAnimate;
+  exports.stopAnimate = stopAnimate;
+
+})(this)
