@@ -3,10 +3,10 @@
 </head>
 <body>
 	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-	<script type="text/javascript" src="game.js"></script>
+	<script type="text/javascript" src="life.js"></script>
 	<script>
-		var g = game(500, 500, 50, 50)
-			.init();
+		var g = game()
+			.init(500, 500, 50, 50);
 
 		d3.select('body').append('div')
 			.text('run')
