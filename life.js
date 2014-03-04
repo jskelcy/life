@@ -4,28 +4,31 @@
 
 		var _svg;
 		var _state = [];
-		var _width = 500;
-		var _height = 500;
-		var _cellLength = 10;
+		var _width;
+		var _height;
+		var _cellLength;
 		var _rows;
 		var _cols;
 		var _interval;
+		var _running = false;
 
-		for (var row = 0 ; row < 50 ; row ++ ) {
-			var r = [];
-			for (var col = 0 ; col < 50 ; col ++ ) {
-				r.push([row, col, Math.round(Math.random())]);
+		base.init = function(w, h, dr, dc) {
+			_width = w;
+			_height = h;
+			_rows = dr;
+			_cols = dc;
+
+			for (var row = 0 ; row < dr ; row ++ ) {
+				var r = [];
+				for (var col = 0 ; col < dc; col ++ ) {
+					r.push([row, col, Math.round(Math.random())]);
+				}
+				_state.push(r);
 			}
-			_state.push(r);
-		}
 
-		base.init = function() {
 			_svg = d3.select('body').append('svg')
 				.style('width',_width)
 				.style('height', _height);
-
-			_rows = _state.length;
-			_cols = _state[0].length;
 
 			_cellLength = _width / _rows;
 
@@ -60,10 +63,11 @@
 					.on('click', function(d, i) {
 						var row = this.getAttribute('row');
 						var col = i;
-						base.stop();
+						window.clearInterval(_interval);
 						_state[row][col][2] = (_state[row][col][2] == 0 ? 1 : 0);
 						base.render();
-						base.run();
+
+						if (_running) base.run();
 					})
 
 			return base;
@@ -137,6 +141,7 @@
 		}
 
 		base.run = function() {
+			_running = true;
 			function r() {
 				base.update();
 				base.render();
@@ -148,6 +153,7 @@
 		}
 
 		base.stop = function() {
+			_running = false;
 			window.clearInterval(_interval);
 
 			return base;
