@@ -1,181 +1,160 @@
-;(function(exports) {
+(function() {
+	game = function() {
+		var base = {};
 
-  var gameState;
-  var canvas;
-  var rows;
-  var cols;
-  var intervalId;
+		var _svg;
+		var _state = [];
+		var _width = 500;
+		var _height = 500;
+		var _cellLength = 10;
+		var _rows;
+		var _cols;
+		var _interval;
 
-  var startAnimate = function() {
-    var update = function(){
-      gameState = stepGame(gameState);
-      renderGrid();
-    };
-    clearInterval(intervalId);
-    intervalId = setInterval(update, 500);
-  };
+		for (var row = 0 ; row < 50 ; row ++ ) {
+			var r = [];
+			for (var col = 0 ; col < 50 ; col ++ ) {
+				r.push([row, col, Math.round(Math.random())]);
+			}
+			_state.push(r);
+		}
 
-  var stopAnimate = function() {
-    clearInterval(intervalId);
-  };
+		base.init = function() {
+			_svg = d3.select('body').append('svg')
+				.style('width',_width)
+				.style('height', _height);
 
-  exports.onload = function() {
-    gameState = initGame();
-    canvas = d3.select('#canvas').append('svg');
+			_rows = _state.length;
+			_cols = _state[0].length;
 
-    canvas.
-      style('height', 500).
-      style('width', 500);
+			_cellLength = _width / _rows;
 
-    renderGrid();
-  };
+			var r = 0;
+			_svg
+				.selectAll('g')
+				.data(_state)
+				.enter()
+				.append('g')
+				.attr('transform', function(d,i) {
+					return 'translate(0,' + (i * _cellLength) + ')';
+				})
+					.selectAll('rect')
+					.data(function(d, i) {
+						return d;
+					})
+					.enter()
+					.append('rect')
+					.attr('x', function(d,i) {
+						return _cellLength * i;
+					})
+					.attr('width',_cellLength)
+					.attr('height',_cellLength)
+					.attr('stroke','black')
+					.attr('fill', function(d,i) {
+						if (d[2]) return 'black';
+						else return 'white';
+					})
+					.attr('row', function(d,i) {
+						return Math.floor(r++ / _cols);
+					})
+					.on('click', function(d, i) {
+						var row = this.getAttribute('row');
+						var col = i;
+						base.stop();
+						_state[row][col][2] = (_state[row][col][2] == 0 ? 1 : 0);
+						base.render();
+						base.run();
+					})
 
-  var initGame = function() {
-    return(
-      {
-      dim: 50,
-      grid: RandomGameGrid(50)
-    }
-    );
-  };
+			return base;
+		}
 
+		base.render = function() {
+			_svg
+				.selectAll('g')
+					.selectAll('rect')
+					.attr('fill', function(d,i) {
+						if (d[2]) return 'black';
+						else return 'white';
+					})
 
-  toggleCell = function(e) {
-    var offsetLeft = canvas.offsetLeft;
-    var offsetTop = canvas.offsetTop;
-    var x = e.pageX - offsetLeft;
-    var y = e.pageY - offsetTop;
-    var cellWidth = 500/gameState.dim;
-    var cellHeight = 500/gameState.dim;
-    var i = Math.floor(y / cellHeight);
-    var j = Math.floor(x / cellWidth);
-    gameState.grid[i][j] = !(gameState.grid[i][j]);
-    renderGrid();
-  }
+			return base;
+		}
 
-  var renderGrid = function() {
-    var numRows = gameState.dim;
-    var numCols = gameState.dim;
-    var x, y;
-    var cellWidth = 500/numCols;
-    var cellHeight = 500/numRows;
+		base.update = function() {
+			var changes = [];
 
-    canvas.selectAll('g').remove();
-    canvas.selectAll('rect').remove();
+			for (var r = 0 ; r < _rows ; r ++ ) {
+				var row = [];
+				for (var c = 0 ; c < _cols ; c ++ ) {
+					row.push(checkState(r, c));
+				}
+				changes.push(row);
+			}
 
-    rows =
-      canvas.selectAll('g')
-        .data(gameState.grid)
-        .enter()
-        .append('g');
+			for (var r = 0 ; r < _rows ; r ++ ) {
+				for (var c = 0 ; c < _cols ; c ++ ) {
+					var change = changes[r][c];
+					if (change) {
+						_state[r][c][2] = (_state[r][c][2] == 0 ? 1 : 0);
+					}
+				}
+			}
 
-    cols =
-      rows
-        .selectAll('rect')
-        .data(function(d, i) { return d; })
-        .enter()
-        .append('rect');
+			return base;
+		}
 
-    var rowi = 0;
+		function checkState(row, col) {
+			var rStart = Math.max(row - 1, 0);
+			var cStart = Math.max(col - 1, 0);
+			var rEnd = Math.min(row + 1, _rows - 1);
+			var cEnd = Math.min(col + 1, _cols - 1);
 
-    rows
-        .attr('transform', function(d, row) {
-          return 'translate(' + 0 + ',' + (row*cellHeight) + ')';
-        });
-    cols
-      .attr('x', function(d, col) {
-            return col*cellWidth;
-          })
-          .attr('fill', function(d, col) {
-            if (d == 0) return 'white';
-            else return 'black';
-          })
-          .attr('row', function() {
-            return Math.floor(rowi++/50);
-          })
-          .attr('width', cellWidth + 'px')
-          .attr('height', cellHeight + 'px')
-          .attr('y', 0)
-          .style('stroke', 'gray')
-          .on('click', function(d, col) {
-            stopAnimate();
-            var r = this.getAttribute('row');
-            console.log("before: " + gameState.grid[r][col]);
-            gameState.grid[r][col] = (gameState.grid[r][col] == 0 ? 1 : 0);
-            console.log("after: " + gameState.grid[r][col]);
-            renderGrid();
-            startAnimate();
-          });
+			var sum = 0;
+			var currentState = _state[row][col][2];
 
-  }
+			for (var r = rStart ; r <= rEnd; r ++ ) {
+				for (var c = cStart ; c <= cEnd ; c ++ ) {
+					sum += _state[r][c][2];
+				}
+			}
 
+			sum -= _state[row][col][2];
+			var change = false;
+			if (currentState == 1) {
+				if (sum < 2) {
+					change = true;
+				} else if ( sum > 3 ) {
+					change = true;
+				}
+			} else if ( currentState == 0 ) {
+				if ( sum == 3) {
+					change = true;
+				}
+			}
 
-  var stepGame = function(gameState) {
-    var newState = initGame();
-    newState.grid = gameState.grid;
-    var newLiving = Array();
-    var newDead = Array();
-    for(var i = 0; i < gameState.dim; i++){
-        for(var j = 0; j < gameState.dim; j++){
-            //this moves through the entire grid
-            var currNode = gameState.grid[i][j];
-            var livingNeighbors = 0;
-            //this nested for loop with traverse the 8 nodes around the currNode
-            for(var k = i - 1; k <= i + 1; k++){
-                for(var m = j - 1; m <= j + 1; m++){
-                    //this looks for adj node
-                    if((k < 0) || (m < 0) || (k >= gameState.dim) || (m >= gameState.dim)){
-                        continue;
-                    }
-                    livingNeighbors += gameState.grid[k][m];
-                }
-            }
-            if(currNode){
-                livingNeighbors--;
-            }
-            //update life of cell
-            if (currNode){
-                if((livingNeighbors <= 1) || (livingNeighbors > 3)){
-                    var deadCords = {yCord: i, xCord: j};
-                    newDead.push(deadCords);
-                }
-            } else{
-                if (livingNeighbors == 3) {
-                    var lifeCords = {yCord: i, xCord: j};
-                    newLiving.push(lifeCords);
-                }
-            }
-        }
-    }
-    for (var i = 0; i < newDead.length; i++) {
-        var killMe = newDead[i];
-        newState.grid[killMe.yCord][killMe.xCord] = 0;
-    }
-    for (var i = 0; i < newLiving.length; i++) {
-        var giveLife = newLiving[i];
-        newState.grid[giveLife.yCord][giveLife.xCord] = 1;
-    }
-    return newState;
-  };
+			return change;
+		}
 
-  function RandomGameGrid(dim){
-    var grid = new Array(dim);
-    for (var i = 0; i < dim; i++){
-        grid[i] = new Array(dim);
-    }
-    for (var i = 0; i < dim; i++){
-        for(var j = 0; j < dim; j++){
-          if (Math.random() < 0.5) {
-            grid[i][j] = 1;
-          } else {
-            grid[i][j] = 0;
-          }
-        }
-    }
-    return grid;
-  }
+		base.run = function() {
+			function r() {
+				base.update();
+				base.render();
+			}
+			window.clearInterval(_interval);
+			_interval = window.setInterval(r, 100);
 
-  exports.startAnimate = startAnimate;
-  exports.stopAnimate = stopAnimate;
+			return base;
+		}
 
-})(this)
+		base.stop = function() {
+			window.clearInterval(_interval);
+
+			return base;
+		}
+
+		return base;
+	}
+
+})()
+

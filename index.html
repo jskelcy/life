@@ -1,14 +1,25 @@
 <html>
-  <head>
-    <script type="text/javascript" src="life.js"></script>
-    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-    <style type="text/css">
-      canvas { border: 1px solid black; }
-    </style>
-  </head>
-  <body>
-    <div id="canvas"> </div>
-    <input id="startButton" type="button" value="start" onclick="startAnimate();" />
-    <input id="stopButton" type="button" value="stop" onclick="stopAnimate();" />
-  </body>
+<head>
+</head>
+<body>
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<script type="text/javascript" src="game.js"></script>
+	<script>
+		var g = game(500, 500, 50, 50)
+			.init();
+
+		d3.select('body').append('div')
+			.text('run')
+			.on('click', function() {
+				g.run();
+			})
+
+		d3.select('body').append('div')
+			.text('stop')
+			.on('click', function() {
+				g.stop();
+			})
+
+	</script>
+</body>
 </html>
