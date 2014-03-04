@@ -1,18 +1,21 @@
 ;(function(exports) {
 
+  document.onclick = function() {console.log("doc click!"); };
+
   var gameState;
   var canvas;
   var rows;
   var cols;
   var intervalId;
+  var numclicks = 0;
 
   var startAnimate = function() {
     var update = function(){
-      gameState = stepGame(gameState);
+      stepGame(gameState);
       renderGrid();
     };
     clearInterval(intervalId);
-    intervalId = setInterval(update, 500);
+    intervalId = setInterval(update, 100);
   };
 
   var stopAnimate = function() {
@@ -98,11 +101,11 @@
           .attr('y', 0)
           .style('stroke', 'gray')
           .on('click', function(d, col) {
+            numclicks++;
+            console.log(numclicks);
             stopAnimate();
             var r = this.getAttribute('row');
-            console.log("before: " + gameState.grid[r][col]);
             gameState.grid[r][col] = (gameState.grid[r][col] == 0 ? 1 : 0);
-            console.log("after: " + gameState.grid[r][col]);
             renderGrid();
             startAnimate();
           });
