@@ -1,16 +1,18 @@
 ;(function(exports) {
 
   var gameState;
-  var ctx;
   var canvas;
+  var rows;
+  var cols;
   var intervalId;
 
   var startAnimate = function() {
     var update = function(){
       gameState = stepGame(gameState);
-      renderGrid(ctx, gameState, canvas.width, canvas.height);
+      renderGrid();
     };
-    intervalId = setInterval(update, 100);
+    clearInterval(intervalId);
+    intervalId = setInterval(update, 500);
   };
 
   var stopAnimate = function() {
@@ -19,10 +21,13 @@
 
   exports.onload = function() {
     gameState = initGame();
-    canvas = document.getElementById("canvas");
-    canvas.addEventListener("click", toggleCell, false);
-    ctx = canvas.getContext("2d");
-    renderGrid(ctx, gameState, canvas.width, canvas.height);
+    canvas = d3.select('#canvas').append('svg');
+
+    canvas.
+      style('height', 500).
+      style('width', 500);
+
+    renderGrid();
   };
 
   var initGame = function() {
@@ -40,51 +45,68 @@
     var offsetTop = canvas.offsetTop;
     var x = e.pageX - offsetLeft;
     var y = e.pageY - offsetTop;
-    var cellWidth = canvas.width/gameState.dim;
-    var cellHeight = canvas.height/gameState.dim;
+    var cellWidth = 500/gameState.dim;
+    var cellHeight = 500/gameState.dim;
     var i = Math.floor(y / cellHeight);
     var j = Math.floor(x / cellWidth);
     gameState.grid[i][j] = !(gameState.grid[i][j]);
-    renderGrid(ctx, gameState, canvas.width, canvas.height);
+    renderGrid();
   }
 
-  var renderGrid = function(context, gameState, height, width) {
+  var renderGrid = function() {
     var numRows = gameState.dim;
     var numCols = gameState.dim;
     var x, y;
-    var cellWidth = width/numCols;
-    var cellHeight = height/numRows;
+    var cellWidth = 500/numCols;
+    var cellHeight = 500/numRows;
 
-    for (var i = 0; i < numRows; i++) {
-      for (var j = 0; j < numCols; j++) {
-        y = i*cellWidth;
-        x = j*cellHeight;
-        if (gameState.grid[i][j] == 1) {
-          context.fillStyle = "rgb(0, 0, 0)";
-        } else {
-          context.fillStyle = "rgb(255, 255, 255)";
-        }
-        context.fillRect(x, y, cellWidth, cellHeight);
-      }
-    }
+    canvas.selectAll('g').remove();
+    canvas.selectAll('rect').remove();
 
-    context.strokeStyle = "gray";
-    // render the horizontal grid lines
-    for (var i = 0; i <= numRows; i++) {
-      context.beginPath();
-      context.moveTo(0, i*cellHeight);
-      context.lineTo(width, i*cellHeight);
-      context.stroke();
-    }
+    rows =
+      canvas.selectAll('g')
+        .data(gameState.grid)
+        .enter()
+        .append('g');
 
-    // render the vertical grid lines
-    for (var j = 0; j <= numCols; j++) {
-      context.beginPath();
-      context.moveTo(j*cellWidth, 0);
-      context.lineTo(j*cellWidth, height);
-      context.stroke();
-    }
-    context.strokeStyle = "black";
+    cols =
+      rows
+        .selectAll('rect')
+        .data(function(d, i) { return d; })
+        .enter()
+        .append('rect');
+
+    var rowi = 0;
+
+    rows
+        .attr('transform', function(d, row) {
+          return 'translate(' + 0 + ',' + (row*cellHeight) + ')';
+        });
+    cols
+      .attr('x', function(d, col) {
+            return col*cellWidth;
+          })
+          .attr('fill', function(d, col) {
+            if (d == 0) return 'white';
+            else return 'black';
+          })
+          .attr('row', function() {
+            return Math.floor(rowi++/50);
+          })
+          .attr('width', cellWidth + 'px')
+          .attr('height', cellHeight + 'px')
+          .attr('y', 0)
+          .style('stroke', 'gray')
+          .on('click', function(d, col) {
+            stopAnimate();
+            var r = this.getAttribute('row');
+            console.log("before: " + gameState.grid[r][col]);
+            gameState.grid[r][col] = (gameState.grid[r][col] == 0 ? 1 : 0);
+            console.log("after: " + gameState.grid[r][col]);
+            renderGrid();
+            startAnimate();
+          });
+
   }
 
 
