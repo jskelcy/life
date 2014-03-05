@@ -26,7 +26,7 @@
         _state.push(r);
       }
 
-      _svg = d3.select('body').append('svg')
+      _svg = d3.select('body').select('svg')
       .style('width',_width)
       .style('height', _height);
 

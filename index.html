@@ -11,10 +11,20 @@
       <input id="stopButton" type="button" value="stop" onclick="g.stop();" />
     </div>
     <div style="clear:both">
+      <svg width=500 height=500> </svg>
       <script>
         var g = game()
         .init(500, 500, 50, 50);
       </script>
+    <div style="clear:both">
+      <h3> Instructions </h3>
+      <p>
+        This Game of Life simulation starts from a random initial grid.<br>
+        Clicking the individual cells toggles them on and off.<br>
+        Clicking the "start" button starts the simulation.<br>
+        Clicking the "stop" button pauses the simulation.<br>
+      </p>
+    </div>
     </div>
   </body>
 </html>
