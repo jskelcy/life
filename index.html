@@ -1,22 +1,25 @@
 <html>
   <head>
+    <title> Game of Life in D3.js </title>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <script type="text/javascript" src="life.js"></script>
+    <link rel="stylesheet" type="text/css" href="styles.css">
   </head>
   <body>
-    <div style="float:left">
+    <h1> Game of Life </h1>
+    <div class="button">
       <input id="startButton" type="button" value="start" onclick="g.run();" />
     </div>
-    <div style="float:left">
+    <div class="button">
       <input id="stopButton" type="button" value="stop" onclick="g.stop();" />
     </div>
-    <div style="clear:both">
+    <div id="svg_canvas">
       <svg width=500 height=500> </svg>
       <script>
         var g = game()
         .init(500, 500, 50, 50);
       </script>
-    <div style="clear:both">
+    <div id="instructions">
       <h3> Instructions </h3>
       <p>
         This Game of Life simulation starts from a random initial grid.<br>
