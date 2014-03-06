@@ -1,4 +1,14 @@
+/** @jsx React.DOM */
 (function() {
+
+  var Board = React.createClass({
+    render: function() {
+      return <h1> Hello World! </h1>
+    }
+  })
+
+  React.renderComponent(<Board />, document.getElementById("svg_canvas"));
+
   game = function() {
     var base = {};
 
