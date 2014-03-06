@@ -1,165 +1,134 @@
+/** @jsx React.DOM */
 (function() {
-  game = function() {
-    var base = {};
 
-    var _svg;
-    var _state = [];
-    var _width;
-    var _height;
-    var _cellLength;
-    var _rows;
-    var _cols;
-    var _interval;
-    var _running = false;
+  var Cell = React.createClass({
+    handleCellClicked: function() {
+      this.props.handleCellClicked(this.props.row, this.props.col);
+    },
 
-    base.init = function(w, h, dr, dc) {
-      _width = w;
-      _height = h;
-      _rows = dr;
-      _cols = dc;
+    render: function() {
+      var dim = this.props.dim;
+      return (
+        <rect
+        width={dim} height={dim} fill={this.props.fill}
+        stroke='black' strokeWidth='1'
+        x={dim*this.props.col} y={dim*this.props.row}
+        onClick={this.handleCellClicked}>
+        </rect>
+      );
+    }
+  });
 
-      for (var row = 0 ; row < dr ; row ++ ) {
-        var r = [];
-        for (var col = 0 ; col < dc; col ++ ) {
-          r.push([row, col, Math.round(Math.random())]);
-        }
-        _state.push(r);
+  var Board = React.createClass({
+    runningQ: false,
+
+    handleCellClicked: function(r, c) {
+      this.handleStop();
+      this.state.grid[r][c] = this.state.grid[r][c] ? 0: 1;
+      if (this.runningQ) {
+        this.forceUpdate(this.handleStart);
+      } else {
+        this.forceUpdate();
       }
+    },
 
-      _svg = d3.select('body').select('svg')
-      .style('width',_width)
-      .style('height', _height);
+    render: function() {
+      var a = [];
+      for (var row=0; row<50; row++) {
+        for (var col=0; col<50; col++) {
+          a.push(<Cell
+                 dim='10' col={col} row={row}
+                 key={row + ',' + col}
+                 fill={this.state.grid[row][col] ? 'black': 'white'}
+                 handleCellClicked={this.handleCellClicked}
+                 />);
+        }
+      }
+      return (
+        <div>
+          <input id="startButton" type="button" value="start" onClick={this.handleStart}/>
+          <input id="stopButton" type="button" value="stop" onClick={this.handleStop}/>
+          <svg>
+            {a}
+          </svg>
+        </div>
+      )
+    },
 
-      _cellLength = _width / _rows;
+    handleStart: function() {
+      this.runningQ = true;
+      this.intervalID = setInterval(this.update, 50);
+    },
 
-      var r = 0;
-      _svg
-      .selectAll('g')
-      .data(_state)
-      .enter()
-      .append('g')
-      .attr('transform', function(d,i) {
-        return 'translate(0,' + (i * _cellLength) + ')';
-      })
-      .selectAll('rect')
-      .data(function(d, i) {
-        return d;
-      })
-      .enter()
-      .append('rect')
-      .attr('x', function(d,i) {
-        return _cellLength * i;
-      })
-      .attr('width',_cellLength)
-      .attr('height',_cellLength)
-      .attr('stroke','black')
-      .attr('fill', function(d,i) {
-        if (d[2]) return 'black';
-        else return 'white';
-      })
-      .attr('row', function(d,i) {
-        return Math.floor(r++ / _cols);
-      })
-      .on('click', function(d, i) {
-        var row = this.getAttribute('row');
-        var col = i;
-        window.clearInterval(_interval);
-        _state[row][col][2] = (_state[row][col][2] == 0 ? 1 : 0);
-        base.render();
+    handleStop: function() {
+      this.runningQ = false;
+      clearInterval(this.intervalID);
+    },
 
-        if (_running) base.run();
-      })
-
-      return base;
-    }
-
-    base.render = function() {
-      _svg
-      .selectAll('g')
-      .selectAll('rect')
-      .attr('fill', function(d,i) {
-        if (d[2]) return 'black';
-        else return 'white';
-      })
-
-      return base;
-    }
-
-    base.update = function() {
-      var changes = [];
-
-      for (var r = 0 ; r < _rows ; r ++ ) {
+    update: function() {
+      var newGrid = [];
+      for (var r = 0 ; r < 50 ; r ++ ) {
         var row = [];
-        for (var c = 0 ; c < _cols ; c ++ ) {
-          row.push(checkState(r, c));
-        }
-        changes.push(row);
-      }
-
-      for (var r = 0 ; r < _rows ; r ++ ) {
-        for (var c = 0 ; c < _cols ; c ++ ) {
-          var change = changes[r][c];
-          if (change) {
-            _state[r][c][2] = (_state[r][c][2] == 0 ? 1 : 0);
+        for (var c = 0 ; c < 50 ; c ++ ) {
+          if(checkState(this.state.grid, r, c)) {
+            row.push(this.state.grid[r][c] ? 0 : 1)
+          } else {
+            row.push(this.state.grid[r][c])
           }
         }
+        newGrid.push(row);
       }
+      this.setState( {grid: newGrid} );
+    },
 
-      return base;
-    }
-
-    function checkState(row, col) {
-      var rStart = Math.max(row - 1, 0);
-      var cStart = Math.max(col - 1, 0);
-      var rEnd = Math.min(row + 1, _rows - 1);
-      var cEnd = Math.min(col + 1, _cols - 1);
-
-      var sum = 0;
-      var currentState = _state[row][col][2];
-
-      for (var r = rStart ; r <= rEnd; r ++ ) {
-        for (var c = cStart ; c <= cEnd ; c ++ ) {
-          sum += _state[r][c][2];
+    getInitialState: function() {
+      var _state = [];
+      for (var row = 0 ; row < 50 ; row ++ ) {
+        var r = [];
+        for (var col = 0 ; col < 50; col ++ ) {
+          r.push(Math.round(Math.random()));
         }
-      }
+        _state.push(r);
+      };
+      return {
+        boardDim: 50,
+        grid: _state
+      };
+    }
+  });
 
-      sum -= _state[row][col][2];
-      var change = false;
-      if (currentState == 1) {
-        if (sum < 2) {
-          change = true;
-        } else if ( sum > 3 ) {
-          change = true;
-        }
-      } else if ( currentState == 0 ) {
-        if ( sum == 3) {
-          change = true;
-        }
-      }
+  React.renderComponent(<Board />, document.getElementById("svg_canvas"));
 
-      return change;
+  function checkState(_state, row, col) {
+    var rStart = Math.max(row - 1, 0);
+    var cStart = Math.max(col - 1, 0);
+    var rEnd = Math.min(row + 1, 50 - 1);
+    var cEnd = Math.min(col + 1, 50 - 1);
+
+    var sum = 0;
+    var currentState = _state[row][col];
+
+    for (var r = rStart ; r <= rEnd; r ++ ) {
+      for (var c = cStart ; c <= cEnd ; c ++ ) {
+        sum += _state[r][c];
+      }
     }
 
-    base.run = function() {
-      _running = true;
-      function r() {
-        base.update();
-        base.render();
+    sum -= _state[row][col];
+    var change = false;
+    if (currentState == 1) {
+      if (sum < 2) {
+        change = true;
+      } else if ( sum > 3 ) {
+        change = true;
       }
-      window.clearInterval(_interval);
-      _interval = window.setInterval(r, 100);
-
-      return base;
+    } else if ( currentState == 0 ) {
+      if ( sum == 3) {
+        change = true;
+      }
     }
 
-    base.stop = function() {
-      _running = false;
-      window.clearInterval(_interval);
-
-      return base;
-    }
-
-    return base;
-  }
+    return change;
+  };
 
 })()
