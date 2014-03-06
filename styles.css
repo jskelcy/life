@@ -7,6 +7,8 @@ h3 {
 }
 
 #svg_canvas {
+  height:500px;
+  width:500px;
   clear:both
 }
 
