@@ -57,12 +57,12 @@
 
     handleStart: function() {
       this.runningQ = true;
-      this.intervalID = setInterval(this.update, 50);
+      this.intervalID = requestAnimationFrame(this.update);
     },
 
     handleStop: function() {
       this.runningQ = false;
-      clearInterval(this.intervalID);
+      cancelAnimationFrame(this.intervalID);
     },
 
     update: function() {
@@ -79,6 +79,7 @@
         newGrid.push(row);
       }
       this.setState( {grid: newGrid} );
+      this.intervalID = requestAnimationFrame(this.update);
     },
 
     getInitialState: function() {
