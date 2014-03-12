@@ -1,6 +1,9 @@
 ## Game of Life in Javascript
 
-A pure Javascript + HTML5 implementation of Conway's Game of Life.  
-The graphics are implemented using D3.js.  
+Javascript + HTML5 implementation of a cellular automata. Everything was done with React.js.
 
-Go to the project page [here](http://jskelcy.github.io/life/).
+Need to do:
+
+  - Refactor the code so the instructions and settings UI elements are separate from the board component.
+  - Move javascript style definitions to separate CSS file.
+  - Support .RLE pattern files.
