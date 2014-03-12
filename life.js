@@ -64,8 +64,9 @@
       this.runningQ = false;
       cancelAnimationFrame(this.intervalID);
     },
-
+    fps: 10,
     update: function() {
+      this.time = new Date().getTime(); 
       var newGrid = [];
       for (var r = 0 ; r < 50 ; r ++ ) {
         var row = [];
@@ -79,6 +80,12 @@
         newGrid.push(row);
       }
       this.setState( {grid: newGrid} );
+      var now = new Date().getTime();
+      var delta = now - this.time;
+      while (delta < 1000 / this.fps) {
+        now = new Date().getTime();
+        delta = now - this.time;
+      }
       this.intervalID = requestAnimationFrame(this.update);
     },
 
