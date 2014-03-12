@@ -21,15 +21,17 @@
 
   var Board = React.createClass({
     runningQ: false,
+    fps: 1000,
+    time: new Date().getTime(),
 
-    handleCellClicked: function(r, c) {
-      this.handleStop();
-      this.state.grid[r][c] = this.state.grid[r][c] ? 0: 1;
-      if (this.runningQ) {
-        this.forceUpdate(this.handleStart);
-      } else {
-        this.forceUpdate();
-      }
+    getInitialState: function() {
+      var state = {};
+      for (var row = 0 ; row < 50 ; row ++ ) {
+        for (var col = 0 ; col < 50; col ++ ) {
+          state[[row,col]] = Math.round(Math.random());
+        }
+      };
+      return state;
     },
 
     render: function() {
@@ -39,7 +41,7 @@
           a.push(<Cell
                  dim='10' col={col} row={row}
                  key={row + ',' + col}
-                 fill={this.state.grid[row][col] ? 'black': 'white'}
+                 fill={this.state[[row,col]] ? 'black': 'white'}
                  handleCellClicked={this.handleCellClicked}
                  />);
         }
@@ -55,31 +57,19 @@
       )
     },
 
-    handleStart: function() {
-      this.runningQ = true;
-      this.intervalID = requestAnimationFrame(this.update);
-    },
-
-    handleStop: function() {
-      this.runningQ = false;
-      cancelAnimationFrame(this.intervalID);
-    },
-    fps: 10,
     update: function() {
       this.time = new Date().getTime(); 
-      var newGrid = [];
+      var newState = {};
       for (var r = 0 ; r < 50 ; r ++ ) {
-        var row = [];
         for (var c = 0 ; c < 50 ; c ++ ) {
-          if(checkState(this.state.grid, r, c)) {
-            row.push(this.state.grid[r][c] ? 0 : 1)
-          } else {
-            row.push(this.state.grid[r][c])
+          if(this.checkState(this.state, r, c)) {
+            newState[[r,c]] = this.state[[r,c]] ? 0 : 1;
           }
         }
-        newGrid.push(row);
       }
-      this.setState( {grid: newGrid} );
+
+      this.setState(newState);
+
       var now = new Date().getTime();
       var delta = now - this.time;
       while (delta < 1000 / this.fps) {
@@ -89,54 +79,58 @@
       this.intervalID = requestAnimationFrame(this.update);
     },
 
-    getInitialState: function() {
-      var _state = [];
-      for (var row = 0 ; row < 50 ; row ++ ) {
-        var r = [];
-        for (var col = 0 ; col < 50; col ++ ) {
-          r.push(Math.round(Math.random()));
+    checkState: function(state, row, col) {
+      var rStart = Math.max(row - 1, 0);
+      var cStart = Math.max(col - 1, 0);
+      var rEnd = Math.min(row + 1, 50 - 1);
+      var cEnd = Math.min(col + 1, 50 - 1);
+
+      var sum = 0;
+      var currentState = state[[row,col]];
+
+      for (var r = rStart ; r <= rEnd; r ++ ) {
+        for (var c = cStart ; c <= cEnd ; c ++ ) {
+          sum += state[[r,c]];
         }
-        _state.push(r);
-      };
-      return {
-        boardDim: 50,
-        grid: _state
-      };
-    }
+      }
+
+      sum -= state[[row,col]];
+      var change = false;
+      if (currentState == 1) {
+        if (sum < 2) {
+          change = true;
+        } else if ( sum > 3 ) {
+          change = true;
+        }
+      } else if ( currentState == 0 ) {
+        if ( sum == 3) {
+          change = true;
+        }
+      }
+
+      return change;
+    },
+
+    handleCellClicked: function(r, c) {
+      cancelAnimationFrame(this.intervalID);
+      this.state[[r,c]] = this.state[[r,c]] ? 0: 1;
+      if (this.runningQ) {
+        this.forceUpdate(this.handleStart);
+      } else {
+        this.forceUpdate();
+      }
+    },
+
+    handleStart: function() {
+      this.runningQ = true;
+      this.intervalID = requestAnimationFrame(this.update);
+    },
+
+    handleStop: function() {
+      this.runningQ = false;
+      cancelAnimationFrame(this.intervalID);
+    },
   });
 
   React.renderComponent(<Board />, document.getElementById("svg_canvas"));
-
-  function checkState(_state, row, col) {
-    var rStart = Math.max(row - 1, 0);
-    var cStart = Math.max(col - 1, 0);
-    var rEnd = Math.min(row + 1, 50 - 1);
-    var cEnd = Math.min(col + 1, 50 - 1);
-
-    var sum = 0;
-    var currentState = _state[row][col];
-
-    for (var r = rStart ; r <= rEnd; r ++ ) {
-      for (var c = cStart ; c <= cEnd ; c ++ ) {
-        sum += _state[r][c];
-      }
-    }
-
-    sum -= _state[row][col];
-    var change = false;
-    if (currentState == 1) {
-      if (sum < 2) {
-        change = true;
-      } else if ( sum > 3 ) {
-        change = true;
-      }
-    } else if ( currentState == 0 ) {
-      if ( sum == 3) {
-        change = true;
-      }
-    }
-
-    return change;
-  };
-
 })()
