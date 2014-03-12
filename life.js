@@ -109,7 +109,7 @@
       }
 
       return change;
-    }
+    },
 
     handleCellClicked: function(r, c) {
       cancelAnimationFrame(this.intervalID);
