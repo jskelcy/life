@@ -24,14 +24,14 @@
     fps: 1000,
     time: new Date().getTime(),
 
-    handleCellClicked: function(r, c) {
-      cancelAnimationFrame(this.intervalID);
-      this.state[[r,c]] = this.state[[r,c]] ? 0: 1;
-      if (this.runningQ) {
-        this.forceUpdate(this.handleStart);
-      } else {
-        this.forceUpdate();
-      }
+    getInitialState: function() {
+      var state = {};
+      for (var row = 0 ; row < 50 ; row ++ ) {
+        for (var col = 0 ; col < 50; col ++ ) {
+          state[[row,col]] = Math.round(Math.random());
+        }
+      };
+      return state;
     },
 
     render: function() {
@@ -57,16 +57,6 @@
       )
     },
 
-    handleStart: function() {
-      this.runningQ = true;
-      this.intervalID = requestAnimationFrame(this.update);
-    },
-
-    handleStop: function() {
-      this.runningQ = false;
-      cancelAnimationFrame(this.intervalID);
-    },
-
     update: function() {
       this.time = new Date().getTime(); 
       var newState = {};
@@ -79,7 +69,7 @@
       }
 
       this.setState(newState);
-      
+
       var now = new Date().getTime();
       var delta = now - this.time;
       while (delta < 1000 / this.fps) {
@@ -87,16 +77,6 @@
         delta = now - this.time;
       }
       this.intervalID = requestAnimationFrame(this.update);
-    },
-
-    getInitialState: function() {
-      var state = {};
-      for (var row = 0 ; row < 50 ; row ++ ) {
-        for (var col = 0 ; col < 50; col ++ ) {
-          state[[row,col]] = Math.round(Math.random());
-        }
-      };
-      return state;
     },
 
     checkState: function(state, row, col) {
@@ -130,6 +110,26 @@
 
       return change;
     }
+
+    handleCellClicked: function(r, c) {
+      cancelAnimationFrame(this.intervalID);
+      this.state[[r,c]] = this.state[[r,c]] ? 0: 1;
+      if (this.runningQ) {
+        this.forceUpdate(this.handleStart);
+      } else {
+        this.forceUpdate();
+      }
+    },
+
+    handleStart: function() {
+      this.runningQ = true;
+      this.intervalID = requestAnimationFrame(this.update);
+    },
+
+    handleStop: function() {
+      this.runningQ = false;
+      cancelAnimationFrame(this.intervalID);
+    },
   });
 
   React.renderComponent(<Board />, document.getElementById("svg_canvas"));
