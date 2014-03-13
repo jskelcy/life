@@ -23,8 +23,15 @@
     runningQ: false,
 
     handleCellClicked: function(r, c) {
-      this.handleStop();
-      this.state.grid[r][c] = this.state.grid[r][c] ? 0: 1;
+      this.state[[r, c]].val = this.state[[r, c]].val === 1 ? 0: 1;
+      function delay() {
+        var start = new Date().getTime();
+        var end = new Date().getTime();
+        while ( end - start < 1000) {
+          end = new Date().getTime();
+        }
+      }
+      cancelAnimationFrame(this.intervalID);
       if (this.runningQ) {
         this.forceUpdate(this.handleStart);
       } else {
@@ -39,7 +46,7 @@
           a.push(<Cell
                  dim='10' col={col} row={row}
                  key={row + ',' + col}
-                 fill={this.state.grid[row][col] ? 'black': 'white'}
+                 fill={this.state[[row, col]].val === 1 ? 'black': 'white'}
                  handleCellClicked={this.handleCellClicked}
                  />);
         }
@@ -66,58 +73,76 @@
     },
 
     update: function() {
-      this.time = new Date().getTime(); 
-      var newGrid = [];
-      for (var r = 0 ; r < 50 ; r ++ ) {
-        var row = [];
-        for (var c = 0 ; c < 50 ; c ++ ) {
-          if(checkState(this.state.grid, r, c)) {
-            row.push(this.state.grid[r][c] ? 0 : 1)
+      var newState = {};
+      for (var row = 0; row < 50; row++) {
+        for (var col = 0; col < 50; col++) {
+          if(checkState(this.state, row, col)) {
+            newState[[row, col]] = {val: this.state[[row, col]].val === 1 ? 0 : 1};
           } else {
-            row.push(this.state.grid[r][c])
+            newState[[row, col]] = {val: this.state[[row, col]].val};
           }
         }
-        newGrid.push(row);
-      }
-      this.setState( {grid: newGrid} );
+      };
+
+      for (var row = 0; row < 50; row++) {
+        for (var col = 0; col < 50; col++) {
+          newState[[row, col]].neighbors = [];
+          var rStart = Math.max(row - 1, 0);
+          var cStart = Math.max(col - 1, 0);
+          var rEnd = Math.min(row + 1, 50 - 1);
+          var cEnd = Math.min(col + 1, 50 - 1);
+
+          for (var r = rStart ; r <= rEnd; r ++ ) {
+            for (var c = cStart ; c <= cEnd ; c ++ ) {
+              if (r === row && c === col) continue;
+              newState[[row, col]].neighbors.push(newState[[r, c]]);
+            }
+          }
+        }
+      };
+      console.log(newState);
+      this.setState(newState);
       this.intervalID = requestAnimationFrame(this.update);
     },
 
     getInitialState: function() {
-      var _state = [];
+      var _state = {};
       for (var row = 0 ; row < 50 ; row ++ ) {
-        var r = [];
         for (var col = 0 ; col < 50; col ++ ) {
-          //r.push(Math.round(Math.random()));
-          r.push(0);
+          _state[[row, col]] = {val: Math.round(Math.random())};
         }
-        _state.push(r);
       };
-      return {
-        boardDim: 50,
-        grid: _state
+
+      for (var row = 0; row < 50; row++) {
+        for (var col = 0; col < 50; col++) {
+          _state[[row, col]].neighbors = [];
+
+          var rStart = Math.max(row - 1, 0);
+          var cStart = Math.max(col - 1, 0);
+          var rEnd = Math.min(row + 1, 50 - 1);
+          var cEnd = Math.min(col + 1, 50 - 1);
+
+          for (var r = rStart ; r <= rEnd; r ++ ) {
+            for (var c = cStart ; c <= cEnd ; c ++ ) {
+              if (r === row && c === col) continue;
+              _state[[row, col]].neighbors.push(_state[[r, c]]);
+            }
+          }
+        }
       };
+      return _state;
     }
   });
 
   React.renderComponent(<Board />, document.getElementById("svg_canvas"));
 
   function checkState(_state, row, col) {
-    var rStart = Math.max(row - 1, 0);
-    var cStart = Math.max(col - 1, 0);
-    var rEnd = Math.min(row + 1, 50 - 1);
-    var cEnd = Math.min(col + 1, 50 - 1);
-
+    var currentState = _state[[row, col]].val;
     var sum = 0;
-    var currentState = _state[row][col];
-
-    for (var r = rStart ; r <= rEnd; r ++ ) {
-      for (var c = cStart ; c <= cEnd ; c ++ ) {
-        sum += _state[r][c];
-      }
+    var nbs = _state[[row, col]].neighbors;
+    for (var i = 0; i < nbs.length; i++) {
+      sum += nbs[i].val
     }
-
-    sum -= _state[row][col];
     var change = false;
     if (currentState == 1) {
       if (sum < 2) {
