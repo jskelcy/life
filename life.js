@@ -2,6 +2,9 @@
 (function() {
 
   var Cell = React.createClass({
+    shouldComponentUpdate: function(nextProps) {
+      return this.props.fill !== nextProps.fill;
+    },
     handleCellClicked: function() {
       this.props.handleCellClicked(this.props.row, this.props.col);
     },
