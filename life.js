@@ -1,4 +1,6 @@
 (function() {
+  // TODO: Game constructor that takes num pix and cells
+  // Then initBlank, initRandom don't need to take pix and cells args.
   game = function() {
     var base = {};
 
@@ -25,6 +27,41 @@
         }
         _state.push(r);
       }
+
+      base.newBoard(w, h, dr, dc);
+      base.render();
+      return base;
+    };
+
+    base.initBlank = function() {
+
+      for (var row = 0 ; row < _rows ; row ++ ) {
+        for (var col = 0 ; col < _cols; col ++ ) {
+          _state[row][col][2] = 0;
+        }
+      }
+
+      base.render();
+    };
+
+    base.initRandom = function() {
+
+      for (var row = 0 ; row < _rows ; row ++ ) {
+        for (var col = 0 ; col < _cols; col ++ ) {
+          _state[row][col][2] = Math.round(Math.random());
+        }
+      }
+
+      base.render();
+    };
+
+    base.newBoard = function(w, h, dr, dc) {
+      _width = w;
+      _height = h;
+      _rows = dr;
+      _cols = dc;
+
+      d3.select('svg').selectAll('g').remove();
 
       _svg = d3.select('body').select('svg')
       .style('width',_width)
@@ -81,7 +118,15 @@
         if (d[2]) return 'black';
         else return 'white';
       })
-
+      /*
+      var gridSum = 0
+      for (var i = 0; i < _state.length; i++) {
+        for (var j = 0; j < _state[0].length; j++) {
+          gridSum += _state[i][j][2]
+        }
+      }
+      console.log("gridSum = " + gridSum);
+      */
       return base;
     }
 

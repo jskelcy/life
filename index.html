@@ -7,17 +7,23 @@
   </head>
   <body>
     <h1> Game of Life (D3) </h1>
-    <div class="button">
-      <input id="startButton" type="button" value="start" onclick="g.run();" />
-    </div>
-    <div class="button">
-      <input id="stopButton" type="button" value="stop" onclick="g.stop();" />
-    </div>
-    <div id="svg_canvas">
+      <div class="button">
+        <input id="initBlankButton" type="button" value="blank" onclick="g.initBlank();"/>
+      </div>
+      <div class="button">
+        <input id="initRandomButton" type="button" value="random" onclick="g.initRandom();" />
+      </div>
+      <div class="button">
+        <input id="startButton" type="button" value="start" onclick="g.run();" />
+      </div>
+      <div class="button">
+        <input id="stopButton" type="button" value="stop" onclick="g.stop();" />
+      </div>
+      <div id="svg_canvas">
       <svg width=500 height=500> </svg>
       <script>
-        var g = game()
-        .init(500, 500, 50, 50);
+        var g = game();
+        g.init(500, 500, 50, 50);
       </script>
     <div id="instructions">
       <h3> Instructions </h3>
