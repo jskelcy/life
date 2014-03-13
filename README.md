@@ -34,6 +34,14 @@ Start a local http server in this repo (here I'm using port 8000) and open local
 [rule146@rule146: life]$ open -a /Applications/Google\ Chrome.app/ http://localhost:8000
 ```
 
+You should see a grid and some buttons for controlling the update animation:
+
+![Game of Life screenshot](images/d3-screenshot.png "Game of Life screenshot")
+
+Here's what the animation looks like:
+
+![Game of Life animation](images/gol-d3-random.gif "Game of Life update animation")
+
 ### Project page
 
-Go to the project page [here](http://jskelcy.github.io/life/).
+See the project page [here](http://jskelcy.github.io/life/).
