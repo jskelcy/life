@@ -4,7 +4,7 @@ This is a minimal implementation of Conway's Game of Life, for the purposes of e
 different Javascript user interface frameworks.  
 
 So far there are implementations using:
-- pure Javascript with HTML5 canvas
+- native Javascript graphics (HTML5 canvas)
 - D3.js (SVG)
 - React.js (SVG)  
 
@@ -23,6 +23,30 @@ Receiving objects: 100% (178/178), 259.97 KiB | 0 bytes/s, done.
 Resolving deltas: 100% (70/70), done.
 Checking connectivity... done.
 [rule146@rule146: code]$ cd life/
+```
+
+Check out the branch with the implementation you're interested in. To see the HTML5 canvas implementation check out the 'canvas' branch:
+
+```bash
+[rule146@rule146: life]$ git checkout canvas
+Switched to branch 'canvas'
+Your branch is up-to-date with 'origin/canvas'.
+```
+
+For the d3.js implementation, check out the 'd3' branch:
+
+```bash
+[rule146@rule146: life]$ git checkout d3
+Switched to branch 'd3'
+Your branch is up-to-date with 'origin/d3'.
+```
+
+The react.js implementation is (currently) on the 'master' branch:
+
+```bash
+[rule146@rule146: life]$ git checkout master
+Switched to branch 'master'
+Your branch is up-to-date with 'origin/master'.
 ```
 
 Start a local http server in this repo (here I'm using port 8000) and open localhost in chrome:
