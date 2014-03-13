@@ -86,7 +86,8 @@
       for (var row = 0 ; row < 50 ; row ++ ) {
         var r = [];
         for (var col = 0 ; col < 50; col ++ ) {
-          r.push(Math.round(Math.random()));
+          //r.push(Math.round(Math.random()));
+          r.push(0);
         }
         _state.push(r);
       };
