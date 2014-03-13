@@ -64,7 +64,7 @@
       this.runningQ = false;
       cancelAnimationFrame(this.intervalID);
     },
-    fps: 10,
+
     update: function() {
       this.time = new Date().getTime(); 
       var newGrid = [];
@@ -80,12 +80,6 @@
         newGrid.push(row);
       }
       this.setState( {grid: newGrid} );
-      var now = new Date().getTime();
-      var delta = now - this.time;
-      while (delta < 1000 / this.fps) {
-        now = new Date().getTime();
-        delta = now - this.time;
-      }
       this.intervalID = requestAnimationFrame(this.update);
     },
 
@@ -94,8 +88,8 @@
       for (var row = 0 ; row < 50 ; row ++ ) {
         var r = [];
         for (var col = 0 ; col < 50; col ++ ) {
-          r.push(Math.round(Math.random()));
-          //r.push(0);
+          //r.push(Math.round(Math.random()));
+          r.push(0);
         }
         _state.push(r);
       };
